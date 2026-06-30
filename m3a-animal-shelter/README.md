@@ -2,6 +2,9 @@
 
 Starter project for M3A practical task: Create a simple Java console application for managing animals in an animal shelter.
 
+## What was done?
+All the tasks should be done
+
 ## Task
 Complete all of the 'TODO' portions of the code. Finished application should support:
 - Adding a new animal
