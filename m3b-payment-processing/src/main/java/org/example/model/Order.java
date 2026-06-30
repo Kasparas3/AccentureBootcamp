@@ -1,5 +1,7 @@
 package org.example.model;
 
+import org.example.config.AppConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,12 +24,18 @@ public class Order {
         items.add(item);
     }
 
-    public double calculateTotal(){
+    public double calculateSubtotal(){
         double total = 0;
         for (OrderItem item : items){
             total += item.calculateTotal();
         }
-        return discount.apply(total);
+        return total;
+    }
+
+    public double calculateTotal(){
+        double discounted = discount.apply(calculateSubtotal());
+        double taxRate = AppConfig.getInstance().getTaxRate();
+        return discounted + (discounted * taxRate);
     }
 
     public void markAsPaid(){
@@ -50,6 +58,9 @@ public class Order {
     }
     public String getCustomerName() {
         return customerName;
+    }
+    public Discount getDiscount() {
+        return discount;
     }
     public OrderStatus getStatus() {
         return status;

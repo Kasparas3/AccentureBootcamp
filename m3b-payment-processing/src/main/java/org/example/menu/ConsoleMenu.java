@@ -1,9 +1,12 @@
 package org.example.menu;
 
 import org.example.config.AppConfig;
+import org.example.model.Discount;
+import org.example.model.FixedAmountDiscount;
 import org.example.model.Order;
 import org.example.model.OrderItem;
 import org.example.model.PaymentResult;
+import org.example.model.PercentageDiscount;
 import org.example.payment.PaymentMethod;
 import org.example.payment.PaymentMethodFactory;
 import org.example.payment.PaymentProcessor;
@@ -30,7 +33,8 @@ public class ConsoleMenu {
                 case 1 -> createOrder();
                 case 2 -> addItem();
                 case 3 -> viewOrder();
-                case 4 -> payOrder();
+                case 4 -> applyDiscount();
+                case 5 -> payOrder();
                 case 0 -> running = false;
                 default -> System.out.println("Invalid option");
             }
@@ -80,7 +84,37 @@ public class ConsoleMenu {
             System.out.println("- " + item);
         }
 
+        double taxRate = AppConfig.getInstance().getTaxRate();
+        System.out.println("Subtotal: " + currentOrder.calculateSubtotal());
+        System.out.println("Discount: " + currentOrder.getDiscount().getCode());
+        System.out.println("Tax: " + (taxRate * 100) + "%");
         System.out.println("Total: " + currentOrder.calculateTotal());
+    }
+
+    private void applyDiscount(){
+        if (currentOrder == null){
+            System.out.println("No order exists. Create an order first.");
+            return;
+        }
+
+        System.out.println("""
+                Discount type:
+                1. Fixed amount
+                2. Percentage
+                """);
+        int type = Integer.parseInt(scanner.nextLine());
+
+        System.out.println("Value:");
+        double value = Double.parseDouble(scanner.nextLine());
+
+        Discount discount = switch (type){
+            case 1 -> new FixedAmountDiscount("FIXED", value);
+            case 2 -> new PercentageDiscount("PERCENT", value);
+            default -> throw new IllegalArgumentException("Invalid discount type");
+        };
+
+        currentOrder.applyDiscount(discount);
+        System.out.println("Discount applied");
     }
 
     private void payOrder(){
@@ -149,7 +183,8 @@ public class ConsoleMenu {
                 1. Create order
                 2. Add item to order
                 3. View order
-                4. Pay order
+                4. Apply discount
+                5. Pay order
                 0. Exit
                 """);
     }
