@@ -2,6 +2,9 @@
 
 Starter project for M3B practical task: Create a simple Java console application that simulates payment processing for an online shop.
 
+## What was done?
+All the main tasks, new payment method, tax and discounts, partial payment validation
+
 ## Task
 The application should support the following payment methods:
 1. Credit Card
