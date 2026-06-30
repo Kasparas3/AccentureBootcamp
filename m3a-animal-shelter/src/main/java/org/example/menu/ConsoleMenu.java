@@ -1,11 +1,6 @@
 package org.example.menu;
 
-import org.example.model.Animal;
-import org.example.model.AnimalId;
-import org.example.model.Bird;
-import org.example.model.Cat;
-import org.example.model.Dog;
-import org.example.model.AdoptionRecord;
+import org.example.model.*;
 import org.example.shelter.Shelter;
 import org.example.util.AnimalStats;
 
@@ -47,7 +42,7 @@ public class ConsoleMenu {
     }
 
     private void addAnimal(){
-        System.out.print("Species (Dog/Cat/Bird): ");
+        System.out.print("Species (Dog/Cat/Bird/Turtle): ");
         String species = scanner.nextLine().trim();
 
         System.out.print("Name: ");
@@ -76,6 +71,7 @@ public class ConsoleMenu {
             case "dog" -> animal = new Dog(new AnimalId(), name, age);
             case "cat" -> animal = new Cat(new AnimalId(), name, age);
             case "bird" -> animal = new Bird(new AnimalId(), name, age);
+            case "turtle" -> animal = new Turtle(new AnimalId(), name, age);
             default -> {
                 System.out.println("Unknown species: " + species);
                 return;
