@@ -5,6 +5,7 @@ import org.example.model.AnimalId;
 import org.example.model.Bird;
 import org.example.model.Cat;
 import org.example.model.Dog;
+import org.example.model.AdoptionRecord;
 import org.example.shelter.Shelter;
 import org.example.util.AnimalStats;
 
@@ -34,6 +35,7 @@ public class ConsoleMenu {
                 case "5" -> markAsAdopted();
                 case "6" -> sortAnimals();
                 case "7" -> showStatistics();
+                case "8" -> showAdoptionHistory();
                 case "0" -> {
                     System.out.println("Goodbye!");
                     running = false;
@@ -102,7 +104,26 @@ public class ConsoleMenu {
     private void markAsAdopted(){
         System.out.print("Animal id to mark as adopted: ");
         String id = scanner.nextLine().trim();
-        shelter.markAsAdopted(id);
+
+        System.out.print("Adopter name: ");
+        String adopterName = scanner.nextLine().trim();
+        if (adopterName.isEmpty()) {
+            System.out.println("Adopter name cannot be empty.");
+            return;
+        }
+
+        shelter.markAsAdopted(id, adopterName);
+    }
+
+    private void showAdoptionHistory(){
+        List<AdoptionRecord> history = shelter.getAdoptionHistory();
+        if (history.isEmpty()) {
+            System.out.println("No animals have been adopted yet.");
+            return;
+        }
+        for (AdoptionRecord record : history) {
+            System.out.println(record);
+        }
     }
 
     private void showStatistics(){
@@ -141,6 +162,7 @@ public class ConsoleMenu {
                 5. Mark animal as adopted
                 6. Sort animals by name or age
                 7. Show statistics
+                8. View adoption history
                 0. Exit
                 """);
     }
