@@ -6,8 +6,10 @@ import org.example.model.Bird;
 import org.example.model.Cat;
 import org.example.model.Dog;
 import org.example.shelter.Shelter;
+import org.example.util.AnimalStats;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ConsoleMenu {
@@ -31,6 +33,7 @@ public class ConsoleMenu {
                 case "4" -> listAnimals(shelter.findAvailableAnimals());
                 case "5" -> markAsAdopted();
                 case "6" -> sortAnimals();
+                case "7" -> showStatistics();
                 case "0" -> {
                     System.out.println("Goodbye!");
                     running = false;
@@ -102,6 +105,23 @@ public class ConsoleMenu {
         shelter.markAsAdopted(id);
     }
 
+    private void showStatistics(){
+        List<Animal> animals = shelter.getAllAnimals();
+        if (animals.isEmpty()) {
+            System.out.println("No animals in the shelter yet.");
+            return;
+        }
+
+        System.out.printf("Average age: %.1f years%n", AnimalStats.averageAge(animals));
+        System.out.println("Oldest animal: " + AnimalStats.oldestAnimal(animals));
+
+        System.out.println("Number of animals per species:");
+        Map<String, Integer> counts = AnimalStats.countBySpecies(animals);
+        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+            System.out.println("  " + entry.getKey() + ": " + entry.getValue());
+        }
+    }
+
     private void sortAnimals(){
         System.out.print("Sort by (name/age): ");
         String choice = scanner.nextLine().trim();
@@ -120,6 +140,7 @@ public class ConsoleMenu {
                 4. List available animals
                 5. Mark animal as adopted
                 6. Sort animals by name or age
+                7. Show statistics
                 0. Exit
                 """);
     }
