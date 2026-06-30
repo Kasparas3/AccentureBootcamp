@@ -7,12 +7,20 @@ public class GiftCardPayment extends PaymentMethod{
     private double balance;
 
     public GiftCardPayment(String code, double balance) {
-        // TODO: contructor
+        super("GiftCard");
+        this.code = code;
+        this.balance = balance;
     }
 
     @Override
     public PaymentResult processPayment(double amount){
-        // TODO: check if balance is enough
-        return new PaymentResult(true, "Paid " + amount + " using gift card");
+        if(code == null || code.isBlank()){
+            return new PaymentResult(false, "Invalid code");
+        }
+        if (amount > balance){
+            return new PaymentResult(false, "GiftCard Not Enough");
+        }
+        balance -= amount;
+        return new PaymentResult(true, "Paid " + amount + " using gift card " + code);
     }
 }
