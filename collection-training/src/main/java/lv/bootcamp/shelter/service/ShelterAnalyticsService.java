@@ -5,6 +5,7 @@ import lv.bootcamp.shelter.service.data.ImportResult;
 import lv.bootcamp.shelter.service.data.ShelterReportData;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ShelterAnalyticsService {
 
@@ -15,19 +16,29 @@ public class ShelterAnalyticsService {
         Map<String, List<Animal>> animalsBySpecies = new HashMap<>();
         List<String> animalsNeedingVetInput = new ArrayList<>();
 
-        // TODO Step 2:
-        // Fill all collections:
-        // - allAnimals (already available from import)
-        // - uniqueSpecies
-        // - animalsBySpecies
-        // - animalsNeedingVetInput with format name(species)
+        for (Animal animal : allAnimals) {
+            uniqueSpecies.add(animal.getSpecies());
+            animalsBySpecies
+                    .computeIfAbsent(animal.getSpecies(), species -> new ArrayList<>())
+                    .add(animal);
+            if (!animal.isVaccinated() || animal.getAge() == null) {
+                animalsNeedingVetInput.add(animal.getName() + "(" + animal.getSpecies() + ")");
+            }
+        }
 
-        // TODO Step 3:
-        // Add necessary fields to ShelterReportData
-        // Use stream pipelines for:
-        // - vaccinated vs unvaccinated counts per species
-        // - oldest animal per species (excluding unknown ages)
+        Map<String, Long> vaccinatedCountBySpecies = allAnimals.stream()
+                .filter(Animal::isVaccinated)
+                .collect(Collectors.groupingBy(Animal::getSpecies, Collectors.counting()));
 
-        return new ShelterReportData(importResult);
+        Map<String, Animal> oldestBySpecies = allAnimals.stream()
+                .filter(animal -> animal.getAge() != null)
+                .collect(Collectors.groupingBy(
+                        Animal::getSpecies,
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparingInt(Animal::getAge)),
+                                oldest -> oldest.orElse(null))));
+
+        return new ShelterReportData(importResult, uniqueSpecies, animalsBySpecies,
+                animalsNeedingVetInput, vaccinatedCountBySpecies, oldestBySpecies);
     }
 }
