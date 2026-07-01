@@ -2,6 +2,10 @@
 
 Starter project for M4 practical task: Collections, Files, and Streams.
 
+## What is done?
+
+All the main tasks
+
 ## Task
 Build a small Java application that:
 1. Parses and validates shelter intake CSV rows.
