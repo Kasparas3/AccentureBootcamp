@@ -24,14 +24,14 @@ public class CsvImportService {
         log.info("Starting import from {}", inputPath);
 
         List<Animal> allAnimals = new ArrayList<>();
-        int skippedRows = 0;
+        List<Integer> invalidRowNumbers = new ArrayList<>();
 
         List<String> lines;
         try {
             lines = Files.readAllLines(inputPath, StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("Failed to read input file {}", inputPath, e);
-            return new ImportResult(allAnimals, skippedRows);
+            return new ImportResult(allAnimals, invalidRowNumbers.size(), invalidRowNumbers);
         }
 
         for (int i = 1; i < lines.size(); i++) {
@@ -44,14 +44,14 @@ public class CsvImportService {
 
             Animal animal = parseRow(line, rowNumber);
             if (animal == null) {
-                skippedRows++;
+                invalidRowNumbers.add(rowNumber);
             } else {
                 allAnimals.add(animal);
             }
         }
 
-        log.info("Import finished: {} imported, {} skipped", allAnimals.size(), skippedRows);
-        return new ImportResult(allAnimals, skippedRows);
+        log.info("Import finished: {} imported, {} skipped", allAnimals.size(), invalidRowNumbers.size());
+        return new ImportResult(allAnimals, invalidRowNumbers.size(), invalidRowNumbers);
     }
 
     private Animal parseRow(String line, int rowNumber) {

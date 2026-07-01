@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ReportExportService {
@@ -48,6 +49,13 @@ public class ReportExportService {
         writer.write("- Imported: " + importResult.allAnimals().size());
         writer.newLine();
         writer.write("- Skipped: " + importResult.skippedRows());
+        writer.newLine();
+        String invalidRows = importResult.invalidRowNumbers().isEmpty()
+                ? "none"
+                : importResult.invalidRowNumbers().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining(", "));
+        writer.write("- Invalid rows: " + invalidRows);
         writer.newLine();
         writer.newLine();
 

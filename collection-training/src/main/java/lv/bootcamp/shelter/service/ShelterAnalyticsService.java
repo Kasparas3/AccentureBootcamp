@@ -21,7 +21,7 @@ public class ShelterAnalyticsService {
             animalsBySpecies
                     .computeIfAbsent(animal.getSpecies(), species -> new ArrayList<>())
                     .add(animal);
-            if (!animal.isVaccinated() || animal.getAge() == null) {
+            if (!animal.isVaccinated() || animal.getAgeOptional().isEmpty()) {
                 animalsNeedingVetInput.add(animal.getName() + "(" + animal.getSpecies() + ")");
             }
         }
@@ -31,7 +31,7 @@ public class ShelterAnalyticsService {
                 .collect(Collectors.groupingBy(Animal::getSpecies, Collectors.counting()));
 
         Map<String, Animal> oldestBySpecies = allAnimals.stream()
-                .filter(animal -> animal.getAge() != null)
+                .filter(animal -> animal.getAgeOptional().isPresent())
                 .collect(Collectors.groupingBy(
                         Animal::getSpecies,
                         Collectors.collectingAndThen(

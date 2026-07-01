@@ -7,12 +7,17 @@ import lv.bootcamp.shelter.service.ShelterAnalyticsService;
 import lv.bootcamp.shelter.service.data.ShelterReportData;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ShelterCsvApplication {
 
     public static void main(String[] args) {
         Path inputPath = Path.of("src", "main", "resources", "data", "intake.csv");
         Path outputPath = Path.of("output", "upload-report.txt");
+
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+        Path timestampedPath = Path.of("output", "upload-report-" + timestamp + ".txt");
 
         CsvImportService importService = new CsvImportService();
         ShelterAnalyticsService analyticsService = new ShelterAnalyticsService();
@@ -21,5 +26,6 @@ public class ShelterCsvApplication {
         ImportResult importResult = importService.importAnimals(inputPath);
         ShelterReportData reportData = analyticsService.buildReportData(importResult);
         reportExportService.writeReport(outputPath, reportData);
+        reportExportService.writeReport(timestampedPath, reportData);
     }
 }
