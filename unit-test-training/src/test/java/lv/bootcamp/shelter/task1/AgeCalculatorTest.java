@@ -50,9 +50,11 @@ class AgeCalculatorTest {
     @Test
     @DisplayName("toMonths: negative years throws IllegalArgumentException")
     void shouldThrowForNegativeYears() {
-        assertThrows(IllegalArgumentException.class, ()->{calculator.toMonths(-1);});
+        assertThrows(IllegalArgumentException.class,
+                ()->{calculator.toMonths(-1);});
         String expectedMessage = "negative";
-        String actualMessage = assertThrows(IllegalArgumentException.class, ()->{calculator.toMonths(-1);}).getMessage();
+        String actualMessage = assertThrows(IllegalArgumentException.class,
+                ()->{calculator.toMonths(-1);}).getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
     }
@@ -90,9 +92,11 @@ class AgeCalculatorTest {
     @Test
     @DisplayName("dogToHumanYears: negative age throws IllegalArgumentException")
     void shouldThrowForNegativeDogAge() {
-        assertThrows(IllegalArgumentException.class, ()->{calculator.dogToHumanYears(-1);});
+        assertThrows(IllegalArgumentException.class,
+                ()->{calculator.dogToHumanYears(-1);});
         String expectedMessage = "negative";
-        String actualMessage = assertThrows(IllegalArgumentException.class, ()->{calculator.dogToHumanYears(-1);}).getMessage();
+        String actualMessage = assertThrows(IllegalArgumentException.class,
+                ()->{calculator.dogToHumanYears(-1);}).getMessage();
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
