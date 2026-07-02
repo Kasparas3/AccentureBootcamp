@@ -6,6 +6,13 @@ A pre-built Java project for practising unit testing with JUnit 5 and AssertJ.
 
 The source code is already implemented. Your job is to **write the tests**.
 
+## What was done?
+
+All the main tasks + the stretch task
+
+In AnimalType, isSenior would be good to check > vs >=, since the division is done with integer.
+
+
 ## How to start
 
 1. Open this folder in IntelliJ IDEA as a Maven project.

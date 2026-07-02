@@ -10,6 +10,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Task 7: Mocking a dependency
@@ -45,28 +54,32 @@ class IntakeServiceTest {
         @Test
         @DisplayName("saves valid animal and returns it")
         void shouldSaveValidAnimal() {
-            // TODO: Stub repository.save(buddy) to return buddy
-            //   Hint: when(repository.save(buddy)).thenReturn(buddy);
-            // TODO: Call service.intake(buddy)
-            // TODO: Assert the returned animal has name "Buddy"
-            // TODO: Verify that repository.save(buddy) was called exactly once
+            when(repository.save(buddy)).thenReturn(buddy);
+
+            Animal result = service.intake(buddy);
+
+            assertThat(result.getName()).isEqualTo("Buddy");
+            verify(repository).save(buddy);
         }
 
         @Test
         @DisplayName("throws for null animal without calling repository")
         void shouldThrowForNullAnimal() {
-            // TODO: Call service.intake(null)
-            // TODO: Assert it throws NullPointerException
-            // TODO: Verify that repository.save(any()) was NEVER called
+            assertThatThrownBy(() -> service.intake(null))
+                    .isInstanceOf(NullPointerException.class);
+
+            verify(repository, never()).save(any());
         }
 
         @Test
         @DisplayName("throws for invalid animal without calling repository")
         void shouldThrowForInvalidAnimal() {
-            // TODO: Create an Animal with blank name
-            //   Animal invalid = new Animal("", "Dog", 3, true, LocalDate.now());
-            // TODO: Assert that service.intake(invalid) throws IllegalArgumentException
-            // TODO: Verify that repository.save(any()) was NEVER called
+            Animal invalid = new Animal("", "Dog", 3, true, LocalDate.now());
+
+            assertThatThrownBy(() -> service.intake(invalid))
+                    .isInstanceOf(IllegalArgumentException.class);
+
+            verify(repository, never()).save(any());
         }
     }
 
@@ -79,25 +92,31 @@ class IntakeServiceTest {
         @Test
         @DisplayName("returns animal when repository finds it")
         void shouldReturnAnimalWhenFound() {
-            // TODO: Stub repository.findByName("Buddy") to return Optional.of(buddy)
-            // TODO: Call service.findByName("Buddy")
-            // TODO: Assert result is not null and name equals "Buddy"
+            when(repository.findByName("Buddy")).thenReturn(Optional.of(buddy));
+
+            Animal result = service.findByName("Buddy");
+
+            assertThat(result).isNotNull();
+            assertThat(result.getName()).isEqualTo("Buddy");
         }
 
         @Test
         @DisplayName("returns null when repository does not find it")
         void shouldReturnNullWhenNotFound() {
-            // TODO: Stub repository.findByName("Ghost") to return Optional.empty()
-            // TODO: Call service.findByName("Ghost")
-            // TODO: Assert result is null
+            when(repository.findByName("Ghost")).thenReturn(Optional.empty());
+
+            Animal result = service.findByName("Ghost");
+
+            assertThat(result).isNull();
         }
 
         @Test
         @DisplayName("throws for blank name without calling repository")
         void shouldThrowForBlankName() {
-            // TODO: Call service.findByName("")
-            // TODO: Assert it throws IllegalArgumentException
-            // TODO: Verify repository.findByName(any()) was NEVER called
+            assertThatThrownBy(() -> service.findByName(""))
+                    .isInstanceOf(IllegalArgumentException.class);
+
+            verify(repository, never()).findByName(any());
         }
     }
 
@@ -110,25 +129,29 @@ class IntakeServiceTest {
         @Test
         @DisplayName("returns list from repository for valid species")
         void shouldReturnAnimalsForValidSpecies() {
-            // TODO: Stub repository.findBySpecies("Dog") to return List.of(buddy)
-            // TODO: Call service.findBySpecies("Dog")
-            // TODO: Assert result has size 1 and contains buddy
+            when(repository.findBySpecies("Dog")).thenReturn(List.of(buddy));
+
+            List<Animal> result = service.findBySpecies("Dog");
+
+            assertThat(result).hasSize(1).contains(buddy);
         }
 
         @Test
         @DisplayName("returns empty list for blank species without calling repository")
         void shouldReturnEmptyForBlankSpecies() {
-            // TODO: Call service.findBySpecies("")
-            // TODO: Assert result is empty
-            // TODO: Verify repository.findBySpecies(any()) was NEVER called
+            List<Animal> result = service.findBySpecies("");
+
+            assertThat(result).isEmpty();
+            verify(repository, never()).findBySpecies(any());
         }
 
         @Test
         @DisplayName("returns empty list for null species without calling repository")
         void shouldReturnEmptyForNullSpecies() {
-            // TODO: Call service.findBySpecies(null)
-            // TODO: Assert result is empty
-            // TODO: Verify repository.findBySpecies(any()) was NEVER called
+            List<Animal> result = service.findBySpecies(null);
+
+            assertThat(result).isEmpty();
+            verify(repository, never()).findBySpecies(any());
         }
     }
 
@@ -141,17 +164,20 @@ class IntakeServiceTest {
         @Test
         @DisplayName("returns the size of all animals from repository")
         void shouldReturnCountFromRepository() {
-            // TODO: Stub repository.findAll() to return a list of 3 animals
-            // TODO: Call service.count()
-            // TODO: Assert result equals 3
+            when(repository.findAll()).thenReturn(List.of(
+                    new Animal("Buddy", "Dog", 3, true, LocalDate.of(2026, 1, 15)),
+                    new Animal("Luna", "Cat", 2, true, LocalDate.of(2026, 1, 10)),
+                    new Animal("Max", "Dog", 5, false, LocalDate.of(2026, 1, 20))));
+
+            assertThat(service.count()).isEqualTo(3);
         }
 
         @Test
         @DisplayName("returns 0 when repository is empty")
         void shouldReturnZeroWhenEmpty() {
-            // TODO: Stub repository.findAll() to return List.of()
-            // TODO: Call service.count()
-            // TODO: Assert result equals 0
+            when(repository.findAll()).thenReturn(List.of());
+
+            assertThat(service.count()).isZero();
         }
     }
 }
