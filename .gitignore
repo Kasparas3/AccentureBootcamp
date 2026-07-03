@@ -9,6 +9,10 @@ target/
 *.iws
 *.iml
 *.ipr
+out/
+
+### Compiled Java ###
+*.class
 
 ### Eclipse ###
 .apt_generated
@@ -18,6 +22,10 @@ target/
 .settings
 .springBeans
 .sts4-cache
+bin/
+
+### Spring Boot ###
+HELP.md
 
 ### NetBeans ###
 /nbproject/private/
