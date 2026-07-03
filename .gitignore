@@ -37,3 +37,8 @@ build/
 
 *.log
 collection-training/output/*.txt
+
+### SQLite ###
+*.db
+*.sqlite
+*.sqlite3
