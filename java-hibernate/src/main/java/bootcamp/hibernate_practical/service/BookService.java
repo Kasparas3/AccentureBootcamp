@@ -78,6 +78,13 @@ public class BookService {
                 .toList();
     }
 
+    public List<BookResponse> searchByTitle(String title) {
+        return bookRepository.findByTitleContainingIgnoreCase(title)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     private BookResponse mapToResponse(Book book) {
         return new BookResponse(
                 book.getId(),

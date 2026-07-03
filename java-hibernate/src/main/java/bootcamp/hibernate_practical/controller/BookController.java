@@ -53,4 +53,9 @@ public class BookController {
         return bookService.findAvailableBooks();
     }
 
+    @GetMapping("/search")
+    public List<BookResponse> searchByTitle(@RequestParam String title) {
+        return bookService.searchByTitle(title);
+    }
+
 }
