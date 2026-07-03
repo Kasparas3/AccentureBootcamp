@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Data
 public class Book {
     @Id
