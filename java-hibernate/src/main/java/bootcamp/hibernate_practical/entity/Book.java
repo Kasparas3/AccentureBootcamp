@@ -7,12 +7,10 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-//@RequiredArgsConstructor
 @Data
 public class Book {
     @Id
