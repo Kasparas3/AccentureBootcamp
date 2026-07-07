@@ -8,6 +8,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +29,9 @@ public class BookRestClientImpl implements BookRestClient {
                     .uri("/books/{id}", id)
                     .retrieve()
                     .body(BookApiResponse.class);
+            if (response == null) {
+                throw new ClientException("Empty response body for book " + id);
+            }
             return toDto(response);
         } catch (HttpClientErrorException e) {
             throw new ClientException("Client error fetching book " + id + ": " + e.getStatusCode(), e);
@@ -35,6 +39,8 @@ public class BookRestClientImpl implements BookRestClient {
             throw new ClientException("Server error fetching book " + id + ": " + e.getStatusCode(), e);
         } catch (ResourceAccessException e) {
             throw new ClientException("Book service is unreachable while fetching book " + id, e);
+        } catch (RestClientException e) {
+            throw new ClientException("Unexpected error fetching book " + id, e);
         }
     }
 
@@ -55,6 +61,8 @@ public class BookRestClientImpl implements BookRestClient {
             throw new ClientException("Server error fetching all books: " + e.getStatusCode(), e);
         } catch (ResourceAccessException e) {
             throw new ClientException("Book service is unreachable while fetching all books", e);
+        } catch (RestClientException e) {
+            throw new ClientException("Unexpected error fetching all books", e);
         }
     }
 
