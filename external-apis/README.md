@@ -5,6 +5,10 @@ This Spring Boot project is the starter for **External APIs in Spring Boot**
 core (interfaces, config, controller) is already in place, and you
 implement the RestClient & WebClient logic behind it.
 
+## What is done?
+
+Both task 1 and task 2 should be fully done
+
 ## Domain
 
 A simple book catalog app that:
