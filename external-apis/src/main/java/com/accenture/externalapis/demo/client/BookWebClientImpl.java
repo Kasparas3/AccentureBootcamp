@@ -44,7 +44,8 @@ public class BookWebClientImpl implements BookWebClient {
 
     @Override
     public Mono<List<BookDto>> getBooksInParallel(Long id1, Long id2) {
-        throw new UnsupportedOperationException("Parallel fetch not implemented yet");
+        return Mono.zip(getBookAsync(id1), getBookAsync(id2))
+                .map(tuple -> List.of(tuple.getT1(), tuple.getT2()));
     }
 
     private BookDto toDto(BookApiResponse response) {
