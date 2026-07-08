@@ -16,6 +16,40 @@ const api = {
     })
 };
 
+function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function inlineMd(s) {
+    return escapeHtml(s)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+}
+
+function renderRich(el, text) {
+    el.innerHTML = '';
+    const segments = String(text).split('```');
+    segments.forEach((seg, i) => {
+        if (i % 2 === 1) {
+            const nl = seg.indexOf('\n');
+            const code = nl >= 0 ? seg.slice(nl + 1) : seg;
+            const pre = document.createElement('pre');
+            pre.className = 'code-block';
+            pre.textContent = code.replace(/\s+$/, '');
+            el.appendChild(pre);
+        } else if (seg.length) {
+            const span = document.createElement('span');
+            span.className = 'md';
+            span.innerHTML = inlineMd(seg);
+            el.appendChild(span);
+        }
+    });
+}
+
+function typingHtml() {
+    return '<span class="typing"><span></span><span></span><span></span></span>';
+}
+
 const els = {
     chatList: document.getElementById('chat-list'),
     messages: document.getElementById('chatMessages'),
@@ -84,7 +118,12 @@ function renderMessage(message) {
     role.className = 'role';
     role.textContent = message.role;
     const body = document.createElement('div');
-    body.textContent = message.content;
+    if (message.role.toLowerCase() === 'assistant') {
+        renderRich(body, message.content);
+    } else {
+        body.className = 'md';
+        body.textContent = message.content;
+    }
     wrapper.append(role, body);
     return wrapper;
 }
@@ -139,8 +178,16 @@ async function submitMessage(content) {
 function appendPending(content) {
     els.messages.querySelector('.empty')?.remove();
     els.messages.appendChild(renderMessage({ role: 'USER', content }));
-    const thinking = renderMessage({ role: 'ASSISTANT', content: '…' });
-    thinking.classList.add('pending');
+
+    const thinking = document.createElement('div');
+    thinking.className = 'msg assistant';
+    const role = document.createElement('div');
+    role.className = 'role';
+    role.textContent = 'ASSISTANT';
+    const body = document.createElement('div');
+    body.innerHTML = typingHtml();
+    thinking.append(role, body);
+
     els.messages.appendChild(thinking);
     els.messages.scrollTop = els.messages.scrollHeight;
 }
@@ -167,6 +214,7 @@ refreshChatList();
 const tabs = document.querySelectorAll('nav.tabs button');
 const views = {
     chat: document.getElementById('view-chat'),
+    code: document.getElementById('view-code'),
     assistant: document.getElementById('view-assistant'),
     agents: document.getElementById('view-agents')
 };
@@ -210,11 +258,11 @@ async function askAssistant(question) {
     assistant.err.textContent = '';
     assistant.send.disabled = true;
     assistant.answer.className = 'card';
-    assistant.answer.textContent = 'Thinking…';
+    assistant.answer.innerHTML = typingHtml();
     try {
         const data = await postJson('/api/assistant', { question });
         assistant.answer.className = 'card';
-        assistant.answer.textContent = data.answer;
+        renderRich(assistant.answer, data.answer);
     } catch (e) {
         assistant.err.textContent = e.message;
         assistant.answer.className = 'card muted';
@@ -244,31 +292,38 @@ const agents = {
     chips: document.getElementById('agents-chips')
 };
 
-function setCard(el, label, body, muted) {
-    el.className = 'card' + (muted ? ' muted' : '');
+function setCard(el, label, body, opts) {
+    opts = opts || {};
+    el.className = 'card' + (opts.muted ? ' muted' : '');
     el.innerHTML = '';
     const l = document.createElement('div');
     l.className = 'card-label';
     l.textContent = label;
     const b = document.createElement('div');
-    b.textContent = body;
+    if (opts.typing) {
+        b.innerHTML = typingHtml();
+    } else if (opts.rich) {
+        renderRich(b, body);
+    } else {
+        b.textContent = body;
+    }
     el.append(l, b);
 }
 
 function resetAgentCards() {
-    setCard(agents.ideas, '💡 Ideas · Agent 1', 'Ideas will appear here.', true);
-    setCard(agents.verdict, '🏆 Verdict · Agent 2', "The critic's pick will appear here.", true);
+    setCard(agents.ideas, '💡 Ideas · Agent 1', 'Ideas will appear here.', { muted: true });
+    setCard(agents.verdict, '🏆 Verdict · Agent 2', "The critic's pick will appear here.", { muted: true });
 }
 
 async function runAgents(topic) {
     agents.err.textContent = '';
     agents.send.disabled = true;
-    setCard(agents.ideas, '💡 Ideas · Agent 1', 'Brainstorming…', false);
-    setCard(agents.verdict, '🏆 Verdict · Agent 2', 'Waiting for the critic…', true);
+    setCard(agents.ideas, '💡 Ideas · Agent 1', '', { typing: true });
+    setCard(agents.verdict, '🏆 Verdict · Agent 2', 'Waiting for the critic…', { muted: true });
     try {
         const data = await postJson('/api/agents/best-idea', { topic });
-        setCard(agents.ideas, '💡 Ideas · Agent 1', data.ideas, false);
-        setCard(agents.verdict, '🏆 Verdict · Agent 2', data.verdict, false);
+        setCard(agents.ideas, '💡 Ideas · Agent 1', data.ideas, { rich: true });
+        setCard(agents.verdict, '🏆 Verdict · Agent 2', data.verdict, { rich: true });
     } catch (e) {
         agents.err.textContent = e.message;
         resetAgentCards();
@@ -289,3 +344,39 @@ addChips(agents.chips,
     (text) => { agents.input.value = text; runAgents(text); });
 
 resetAgentCards();
+
+const code = {
+    input: document.getElementById('code-input'),
+    send: document.getElementById('code-send'),
+    err: document.getElementById('code-err'),
+    result: document.getElementById('code-result'),
+    modes: document.getElementById('code-modes')
+};
+let codeMode = 'review';
+
+code.modes.querySelectorAll('.mode').forEach(btn => btn.addEventListener('click', () => {
+    code.modes.querySelectorAll('.mode').forEach(b => b.classList.toggle('active', b === btn));
+    codeMode = btn.dataset.mode;
+}));
+
+async function runCode() {
+    const source = code.input.value.trim();
+    if (!source) return;
+    code.err.textContent = '';
+    code.send.disabled = true;
+    code.result.className = 'card';
+    code.result.innerHTML = typingHtml();
+    try {
+        const data = await postJson('/api/code', { code: source, mode: codeMode });
+        code.result.className = 'card';
+        renderRich(code.result, data.result);
+    } catch (e) {
+        code.err.textContent = e.message;
+        code.result.className = 'card muted';
+        code.result.textContent = 'The result will appear here.';
+    } finally {
+        code.send.disabled = false;
+    }
+}
+
+code.send.onclick = runCode;
