@@ -1,15 +1,17 @@
 package com.accenture.springai_bootcamp_demo.client;
 
+import com.accenture.springai_bootcamp_demo.config.OpenRouterProperties;
 import com.accenture.springai_bootcamp_demo.entity.ChatMessage;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
 
 /**
  * Thin client over the OpenRouter chat completions API, backed by Spring AI's
@@ -19,8 +21,14 @@ import org.springframework.web.client.HttpClientErrorException;
 @Slf4j
 @Component
 public class OpenRouterClient {
-    //TODO add OpenRouter client and config dependency injection
 
+    private final ChatClient chatClient;
+    private final OpenRouterProperties properties;
+
+    public OpenRouterClient(ChatClient.Builder chatClientBuilder, OpenRouterProperties properties) {
+        this.chatClient = chatClientBuilder.build();
+        this.properties = properties;
+    }
 
     public String complete(List<ChatMessage> history) {
         requireApiKey();
@@ -30,8 +38,10 @@ public class OpenRouterClient {
 
     private String call(List<ChatMessage> history) {
         try {
-            //TODO: add OpenRouter call
-            throw new OpenRouterException("Functionality is not yet implemented!");
+            return chatClient.prompt()
+                    .messages(toMessages(history))
+                    .call()
+                    .content();
         } catch (OpenRouterException ex) {
             throw ex;
         } catch (RuntimeException ex) {
@@ -40,7 +50,17 @@ public class OpenRouterClient {
         }
     }
 
-    //TODO: use helper methods for more readable code
+    private List<Message> toMessages(List<ChatMessage> history) {
+        return history.stream().map(this::toMessage).toList();
+    }
+
+    private Message toMessage(ChatMessage message) {
+        return switch (message.getRole()) {
+            case SYSTEM -> new SystemMessage(message.getContent());
+            case USER -> new UserMessage(message.getContent());
+            case ASSISTANT -> new AssistantMessage(message.getContent());
+        };
+    }
 
     private String extractContent(String content) {
         if (!StringUtils.hasText(content)) {
@@ -50,6 +70,8 @@ public class OpenRouterClient {
     }
 
     private void requireApiKey() {
-        //TODO: validate against OpenRouter config
+        if (!StringUtils.hasText(properties.apiKey())) {
+            throw new OpenRouterException("OpenRouter API key is not configured");
+        }
     }
 }
