@@ -20,14 +20,25 @@ public class AssistantController {
         this.assistantTools = assistantTools;
     }
 
+    private static final String FALLBACK =
+            "I can only help with math or the current date/time. Try something like \"What is 45 * 12?\" "
+                    + "or \"What is the current time?\".";
+
     @PostMapping
     public AssistantResponse ask(@RequestBody AskRequest request) {
+        String question = request.question() == null ? "" : request.question().trim();
+        if (question.isEmpty()) {
+            return new AssistantResponse(FALLBACK);
+        }
+
         String answer = chatClient.prompt()
-                .system("You are a helpful assistant with tools. You are unreliable at mental arithmetic and "
-                        + "do not know the real current time. For ANY arithmetic you MUST call the calculate tool "
-                        + "and report its exact result. For the current date or time you MUST call the "
-                        + "currentDateTime tool. Never guess these values yourself.")
-                .user(request.question())
+                .system("You are a focused assistant that only helps with arithmetic and the current date/time, "
+                        + "using the provided tools. Call a tool ONLY when the user clearly asks for a calculation "
+                        + "with real numbers, or for the current date/time, and report the tool's exact result. "
+                        + "Never invent numbers or a calculation the user did not provide. If the message is empty, "
+                        + "unclear, or not about math or time, do NOT call any tool and reply with exactly this "
+                        + "sentence: " + FALLBACK)
+                .user(question)
                 .tools(assistantTools)
                 .call()
                 .content();
