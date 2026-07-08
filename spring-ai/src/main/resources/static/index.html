@@ -201,6 +201,26 @@
             line-height: 1.6;
         }
         .card.muted { color: var(--muted); }
+        .code-area {
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 220px;
+        }
+        .modes { display: flex; gap: 8px; flex-wrap: wrap; }
+        .mode {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--panel-2);
+            background: var(--panel);
+            color: var(--muted);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        .mode:hover { color: var(--text); }
+        .mode.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .card.code-result { font-family: "Consolas", "Courier New", monospace; font-size: 13px; }
         .card .card-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -214,6 +234,7 @@
 <nav class="tabs">
     <span class="brand">🧠 SpringAI</span>
     <button data-view="chat" class="active">💬 Chat</button>
+    <button data-view="code">👨‍💻 Code</button>
     <button data-view="assistant">🛠 Assistant</button>
     <button data-view="agents">🤖 Agents</button>
 </nav>
@@ -234,6 +255,28 @@
                 <button id="send" type="submit" disabled>Send</button>
             </form>
         </main>
+    </section>
+
+    <section id="view-code" class="view">
+        <div class="panel-view">
+            <div class="panel">
+                <h2>👨‍💻 Code Assistant</h2>
+                <p class="subtitle">Paste code, choose what you want, and the local model reviews, explains,
+                    refactors, or hunts for bugs.</p>
+                <textarea id="code-input" class="code-area" rows="12" placeholder="Paste your code here..."></textarea>
+                <div class="modes" id="code-modes">
+                    <button class="mode active" data-mode="review">🔍 Review</button>
+                    <button class="mode" data-mode="explain">📖 Explain</button>
+                    <button class="mode" data-mode="refactor">✨ Refactor</button>
+                    <button class="mode" data-mode="bugs">🐛 Find bugs</button>
+                </div>
+                <div class="field">
+                    <button id="code-send" class="btn">Run</button>
+                </div>
+                <div class="err" id="code-err"></div>
+                <div class="card muted code-result" id="code-result">The result will appear here.</div>
+            </div>
+        </div>
     </section>
 
     <section id="view-assistant" class="view">
@@ -272,6 +315,6 @@
     </section>
 </div>
 
-<script src="/app.js?v=2"></script>
+<script src="/app.js?v=3"></script>
 </body>
 </html>

@@ -167,6 +167,7 @@ refreshChatList();
 const tabs = document.querySelectorAll('nav.tabs button');
 const views = {
     chat: document.getElementById('view-chat'),
+    code: document.getElementById('view-code'),
     assistant: document.getElementById('view-assistant'),
     agents: document.getElementById('view-agents')
 };
@@ -289,3 +290,39 @@ addChips(agents.chips,
     (text) => { agents.input.value = text; runAgents(text); });
 
 resetAgentCards();
+
+const code = {
+    input: document.getElementById('code-input'),
+    send: document.getElementById('code-send'),
+    err: document.getElementById('code-err'),
+    result: document.getElementById('code-result'),
+    modes: document.getElementById('code-modes')
+};
+let codeMode = 'review';
+
+code.modes.querySelectorAll('.mode').forEach(btn => btn.addEventListener('click', () => {
+    code.modes.querySelectorAll('.mode').forEach(b => b.classList.toggle('active', b === btn));
+    codeMode = btn.dataset.mode;
+}));
+
+async function runCode() {
+    const source = code.input.value.trim();
+    if (!source) return;
+    code.err.textContent = '';
+    code.send.disabled = true;
+    code.result.className = 'card code-result';
+    code.result.textContent = 'Analyzing…';
+    try {
+        const data = await postJson('/api/code', { code: source, mode: codeMode });
+        code.result.className = 'card code-result';
+        code.result.textContent = data.result;
+    } catch (e) {
+        code.err.textContent = e.message;
+        code.result.className = 'card muted code-result';
+        code.result.textContent = 'The result will appear here.';
+    } finally {
+        code.send.disabled = false;
+    }
+}
+
+code.send.onclick = runCode;
