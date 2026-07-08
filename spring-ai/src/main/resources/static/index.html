@@ -14,6 +14,8 @@
             --muted: #94a3b8;
             --user: #4f46e5;
             --assistant: #334155;
+            --border: #0b1120;
+            --danger: #f87171;
         }
         * { box-sizing: border-box; }
         body {
@@ -23,19 +25,47 @@
             color: var(--text);
             height: 100vh;
             display: flex;
+            flex-direction: column;
         }
+        nav.tabs {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 16px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+        }
+        nav.tabs .brand { font-weight: 700; font-size: 16px; margin-right: 18px; }
+        nav.tabs button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        nav.tabs button:hover { background: var(--panel-2); color: var(--text); }
+        nav.tabs button.active { background: var(--accent); color: white; }
+
+        .views { flex: 1; min-height: 0; display: flex; }
+        .view { flex: 1; min-height: 0; }
+        .view:not(.active) { display: none; }
+        .view.active { display: flex; }
+
         aside {
             width: 280px;
             background: var(--panel);
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #0b1120;
+            border-right: 1px solid var(--border);
         }
         aside header {
             padding: 16px;
             font-weight: 600;
             font-size: 18px;
-            border-bottom: 1px solid #0b1120;
+            border-bottom: 1px solid var(--border);
         }
         #new-chat {
             margin: 12px;
@@ -75,8 +105,8 @@
             cursor: pointer;
             font-size: 14px;
         }
-        .chat-item .del:hover { color: #f87171; }
-        main { flex: 1; display: flex; flex-direction: column; }
+        .chat-item .del:hover { color: var(--danger); }
+        main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
         main header {
             padding: 16px 20px;
             border-bottom: 1px solid var(--panel);
@@ -121,24 +151,127 @@
             cursor: pointer;
         }
         #send:disabled { opacity: 0.5; cursor: default; }
-        #error { color: #f87171; padding: 0 20px 10px; min-height: 18px; font-size: 13px; }
+        #error { color: var(--danger); padding: 0 20px 10px; min-height: 18px; font-size: 13px; }
+
+        .panel-view { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 32px 20px; }
+        .panel { width: 100%; max-width: 760px; display: flex; flex-direction: column; gap: 16px; }
+        .panel h2 { margin: 0; font-size: 22px; }
+        .panel .subtitle { color: var(--muted); margin: -8px 0 0; font-size: 14px; line-height: 1.5; }
+        .field { display: flex; gap: 10px; }
+        .field textarea, .field input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--panel-2);
+            background: var(--panel);
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+        }
+        .btn {
+            padding: 0 22px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn:disabled { opacity: 0.5; cursor: default; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip {
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: var(--panel-2);
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 13px;
+            border: none;
+            font-family: inherit;
+        }
+        .chip:hover { color: var(--text); }
+        .err { color: var(--danger); font-size: 13px; min-height: 16px; }
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--panel-2);
+            border-radius: 12px;
+            padding: 16px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .card.muted { color: var(--muted); }
+        .card .card-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
-<aside>
-    <header>💬 Chats</header>
-    <button id="new-chat">+ New chat</button>
-    <div id="chat-list"></div>
-</aside>
-<main>
-    <header id="chat-title">Select or start a chat</header>
-    <div id="chatMessages"><div class="empty">No conversation selected.</div></div>
-    <div id="error"></div>
-    <form id="composer">
-        <textarea id="input" rows="2" placeholder="Type a chatMessage and press Enter..." disabled></textarea>
-        <button id="send" type="submit" disabled>Send</button>
-    </form>
-</main>
-<script src="/app.js?v=chatMessages"></script>
+<nav class="tabs">
+    <span class="brand">🧠 SpringAI</span>
+    <button data-view="chat" class="active">💬 Chat</button>
+    <button data-view="assistant">🛠 Assistant</button>
+    <button data-view="agents">🤖 Agents</button>
+</nav>
+
+<div class="views">
+    <section id="view-chat" class="view active">
+        <aside>
+            <header>💬 Chats</header>
+            <button id="new-chat">+ New chat</button>
+            <div id="chat-list"></div>
+        </aside>
+        <main>
+            <header id="chat-title">Select or start a chat</header>
+            <div id="chatMessages"><div class="empty">No conversation selected.</div></div>
+            <div id="error"></div>
+            <form id="composer">
+                <textarea id="input" rows="2" placeholder="Type a message and press Enter..." disabled></textarea>
+                <button id="send" type="submit" disabled>Send</button>
+            </form>
+        </main>
+    </section>
+
+    <section id="view-assistant" class="view">
+        <div class="panel-view">
+            <div class="panel">
+                <h2>🛠 Tool Assistant</h2>
+                <p class="subtitle">Asks the local model, which can call Java tools for exact math and the current
+                    date/time instead of guessing.</p>
+                <div class="field">
+                    <textarea id="assistant-input" rows="2" placeholder="Ask something, e.g. What is 987 × 654?"></textarea>
+                    <button id="assistant-send" class="btn">Ask</button>
+                </div>
+                <div class="chips" id="assistant-chips"></div>
+                <div class="err" id="assistant-err"></div>
+                <div class="card muted" id="assistant-answer">The answer will appear here.</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-agents" class="view">
+        <div class="panel-view">
+            <div class="panel">
+                <h2>🤖 Multi-Agent Workflow</h2>
+                <p class="subtitle">An ideator agent brainstorms three options, then a critic agent picks the best
+                    one and justifies it.</p>
+                <div class="field">
+                    <input id="agents-input" placeholder="Enter a topic, e.g. a fun weekend project"/>
+                    <button id="agents-send" class="btn">Run</button>
+                </div>
+                <div class="chips" id="agents-chips"></div>
+                <div class="err" id="agents-err"></div>
+                <div class="card muted" id="agents-ideas"></div>
+                <div class="card muted" id="agents-verdict"></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="/app.js?v=2"></script>
 </body>
 </html>
