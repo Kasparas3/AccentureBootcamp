@@ -1,6 +1,5 @@
 package com.accenture.springai_bootcamp_demo.client;
 
-import com.accenture.springai_bootcamp_demo.config.OpenRouterProperties;
 import com.accenture.springai_bootcamp_demo.entity.ChatMessage;
 import java.util.List;
 
@@ -14,24 +13,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Thin client over the OpenRouter chat completions API, backed by Spring AI's
- * {@link ChatClient}. Keeps the public surface intentionally small: callers
- * hand over the conversation history and receive the assistant's reply text.
+ * Thin client over the local model, backed by Spring AI's {@link ChatClient}.
+ * Callers hand over the conversation history and receive the assistant's reply.
  */
 @Slf4j
 @Component
 public class OpenRouterClient {
 
     private final ChatClient chatClient;
-    private final OpenRouterProperties properties;
 
-    public OpenRouterClient(ChatClient.Builder chatClientBuilder, OpenRouterProperties properties) {
+    public OpenRouterClient(ChatClient.Builder chatClientBuilder) {
         this.chatClient = chatClientBuilder.build();
-        this.properties = properties;
     }
 
     public String complete(List<ChatMessage> history) {
-        requireApiKey();
         String reply = call(history);
         return extractContent(reply);
     }
@@ -45,8 +40,8 @@ public class OpenRouterClient {
         } catch (OpenRouterException ex) {
             throw ex;
         } catch (RuntimeException ex) {
-            log.error("OpenRouter request failed", ex);
-            throw new OpenRouterException("Failed to reach OpenRouter: " + ex.getMessage(), ex);
+            log.error("Chat model request failed", ex);
+            throw new OpenRouterException("Failed to reach the chat model: " + ex.getMessage(), ex);
         }
     }
 
@@ -64,14 +59,8 @@ public class OpenRouterClient {
 
     private String extractContent(String content) {
         if (!StringUtils.hasText(content)) {
-            throw new OpenRouterException("OpenRouter returned an empty response");
+            throw new OpenRouterException("The chat model returned an empty response");
         }
         return content.trim();
-    }
-
-    private void requireApiKey() {
-        if (!StringUtils.hasText(properties.apiKey())) {
-            throw new OpenRouterException("OpenRouter API key is not configured");
-        }
     }
 }

@@ -17,8 +17,3 @@ spring:
       chat:
         options:
           model: ${OLLAMA_MODEL:llama3.2}
-
-openrouter:
-  base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
-  api-key: ${OPENROUTER_API_KEY:ollama}
-  model: ${OLLAMA_MODEL:llama3.2}
