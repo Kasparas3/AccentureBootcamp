@@ -1,0 +1,18 @@
+target/
+
+# Maven wrapper logs
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# VS Code workspace settings
+.vscode/
+
+# OS files
+Thumbs.db
+Desktop.ini
