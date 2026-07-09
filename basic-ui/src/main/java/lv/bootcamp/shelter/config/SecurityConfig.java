@@ -99,6 +99,8 @@ public class SecurityConfig {
                 // aren't needed there. Browser-facing pages/forms keep CSRF protection.
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+                        .permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/", "/*.html", "/css/**", "/js/**", "/images/**", "/favicon.ico")
                         .permitAll()
