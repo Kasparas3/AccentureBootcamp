@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shelter Animals</title>
+  <style>
+    body { font-family: sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; }
+    nav { background: #f1f5f9; padding: 0.6rem 1rem; border-radius: 6px; margin-bottom: 1.5rem; }
+    nav a { margin-right: 1rem; text-decoration: none; color: #2563eb; }
+    nav a:hover { text-decoration: underline; }
+    h1 { border-bottom: 2px solid #333; padding-bottom: 0.4rem; }
+    ul { list-style: none; padding: 0; }
+    li { border: 1px solid #ddd; border-radius: 6px; padding: 1rem; margin-bottom: 1rem; display: flex; gap: 1rem; align-items: flex-start; }
+    li img { border-radius: 4px; }
+    .info { flex: 1; }
+    .status-available { color: green; font-weight: bold; }
+    .status-adopted   { color: #999;  font-weight: bold; }
+    .adoption-note { color: #666; font-style: italic; margin-left: 0.4rem; }
+    button { padding: 0.4rem 1rem; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    form.adopt { display: inline-block; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/">Home</a>
+    <a href="/animals">All animals</a>
+    <a th:if="${isAdmin}" href="/animals/new">Add animal</a>
+  </nav>
+
+  <main>
+    <h1>Shelter Animals</h1>
+
+    <section aria-label="Animal list">
+      <ul>
+        <li th:each="animal : ${animals}">
+          <img th:src="${animal.imageUrl}" th:alt="'Photo of ' + ${animal.name}"
+               width="300" height="200" style="object-fit: cover;">
+          <div class="info">
+            <strong th:text="${animal.name}">Name</strong>
+            — <span th:text="${animal.type}">TYPE</span>
+            | <span th:text="${animal.breed}">Breed</span>
+            | Age: <span th:text="${animal.age}">0</span>
+            <span th:text="${animal.status}"
+                  th:class="${animal.status.name() == 'AVAILABLE'} ? 'status-available' : 'status-adopted'">STATUS</span>
+            <span class="adoption-note"
+                  th:if="${isAdmin and animal.status.name() == 'ADOPTED'}"
+                  th:text="${animal.adoptionNote}"></span>
+            <p th:text="${animal.description}">Description</p>
+            <form class="adopt" method="post"
+                  th:if="${isUser and animal.status.name() == 'AVAILABLE'}"
+                  th:action="@{/api/animals/{id}/adopt(id=${animal.id})}">
+              <button type="submit">Adopt</button>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+</body>
+</html>
